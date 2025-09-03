@@ -34,6 +34,9 @@ public interface User32 extends com.sun.jna.platform.win32.User32 {
 
     boolean PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+    boolean SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx,
+                         int cy, int uFlags);
+
     BOOL SendNotifyMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
     BOOL SendMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);

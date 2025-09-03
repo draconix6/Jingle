@@ -99,11 +99,11 @@ public final class WindowStateUtil {
     }
 
     public static void setHwndRectangle(HWND hwnd, Rectangle rectangle) {
-        User32.INSTANCE.MoveWindow(hwnd, rectangle.x, rectangle.y, rectangle.width, rectangle.height, true);
+        User32.INSTANCE.MoveWindow(hwnd, (int) Math.floor(rectangle.x / MonitorUtil.scaleFactor), (int) Math.floor(rectangle.y / MonitorUtil.scaleFactor), (int) (rectangle.width / MonitorUtil.scaleFactor), (int) (rectangle.height / MonitorUtil.scaleFactor), true);
     }
 
     public static Rectangle withTopLeftToCenter(Rectangle bounds) {
-        return new Rectangle(bounds.x - bounds.width / 2, bounds.y - bounds.height / 2, bounds.width, bounds.height);
+        return new Rectangle((int) Math.floor(bounds.x * MonitorUtil.scaleFactor - bounds.width / 2), (int) Math.floor(bounds.y * MonitorUtil.scaleFactor - bounds.height / 2), bounds.width, bounds.height);
     }
 
     public static void ensureNotMinimized(HWND hwnd) {

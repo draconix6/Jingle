@@ -4,6 +4,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinDef;
 import xyz.duncanruns.jingle.Jingle;
 import xyz.duncanruns.jingle.instance.OpenedInstanceInfo;
+import xyz.duncanruns.jingle.util.MonitorUtil;
 import xyz.duncanruns.jingle.util.WindowStateUtil;
 import xyz.duncanruns.jingle.win32.User32;
 
@@ -18,6 +19,18 @@ public final class Resizing {
     private static long previousExStyle = 0;
 
     private Resizing() {
+    }
+
+    private static void setWindowPos(WinDef.HWND hwnd, Rectangle newRectangle) {
+        User32.INSTANCE.SetWindowPos(
+                hwnd,
+                new WinDef.HWND(new Pointer(0)),
+                (int) (newRectangle.x / MonitorUtil.scaleFactor),
+                (int) (newRectangle.y / MonitorUtil.scaleFactor),
+                (int) Math.floor(newRectangle.width / MonitorUtil.scaleFactor),
+                (int) Math.floor(newRectangle.height / MonitorUtil.scaleFactor),
+                0x0400
+        );
     }
 
     /**
@@ -39,6 +52,9 @@ public final class Resizing {
         int centerX = (int) previousRectangle.getCenterX();
         int centerY = (int) previousRectangle.getCenterY();
 
+        previousRectangle.width = (int) Math.floor(previousRectangle.width * MonitorUtil.scaleFactor);
+        previousRectangle.height = (int) Math.floor(previousRectangle.height * MonitorUtil.scaleFactor);
+
         boolean resizing = !currentlyResized || previousRectangle.width != width || previousRectangle.height != height;
 
         if (resizing) {
@@ -54,7 +70,7 @@ public final class Resizing {
 
             // Set window position
             WindowStateUtil.setHwndBorderless(hwnd);
-            User32.INSTANCE.SetWindowPos(hwnd, new WinDef.HWND(new Pointer(0)), newRectangle.x, newRectangle.y, newRectangle.width, newRectangle.height, 0x0400);
+            setWindowPos(hwnd, newRectangle);
             return (currentlyResized = true);
         } else {
             undoResize();
@@ -77,7 +93,7 @@ public final class Resizing {
 
         User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_STYLE, previousStyle);
         User32.INSTANCE.SetWindowLongA(hwnd, User32.GWL_EXSTYLE, previousExStyle);
-        User32.INSTANCE.SetWindowPos(hwnd, new WinDef.HWND(new Pointer(0)), newRectangle.x, newRectangle.y, newRectangle.width, newRectangle.height, 0x0400);
+        setWindowPos(hwnd, newRectangle);
         currentlyResized = false;
     }
 }

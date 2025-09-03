@@ -34,6 +34,8 @@ public interface GDI32Extra extends GDI32 {
 
     boolean SetColorAdjustment(HDC hdc, COLORADJUSTMENT lpca);
 
+    int GetDeviceCaps(HDC hdc, int index);
+
     @Structure.FieldOrder({"caSize", "caFlags", "caIlluminantIndex", "caRedGamma", "caGreenGamma", "caBlueGamma", "caReferenceBlack", "caReferenceWhite", "caContrast", "caBrightness", "caColorfulness", "caRedGreenTint"})
     class COLORADJUSTMENT extends Structure {
         public WinDef.WORD caSize;

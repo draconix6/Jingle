@@ -1,17 +1,43 @@
 package xyz.duncanruns.jingle.util;
 
+import com.sun.jna.platform.win32.WinDef;
+import xyz.duncanruns.jingle.win32.GDI32Extra;
+import xyz.duncanruns.jingle.win32.User32;
+
 import java.awt.*;
 
 public final class MonitorUtil {
     public static int minY = 0;
+    public static float scaleFactor = 1.0f;
 
     private MonitorUtil() {
     }
 
     public static Monitor getPrimaryMonitor() {
+        // Java 8 fails to account for the "Scale" setting in Windows display settings on its own
+        if (System.getProperty("java.version").startsWith("1.8"))
+        {
+            // https://stackoverflow.com/questions/5977445/how-to-get-windows-display-settings
+            WinDef.HDC hdc = User32.INSTANCE.GetWindowDC(null);
+            int virtualHeight = GDI32Extra.INSTANCE.GetDeviceCaps(hdc, 10);
+            int physicalHeight = GDI32Extra.INSTANCE.GetDeviceCaps(hdc, 117);
+            User32.INSTANCE.ReleaseDC(null, hdc);
+
+            scaleFactor = Math.round((float) physicalHeight / (float) virtualHeight * 100.f) / 100.f;
+        }
+
         GraphicsDevice defaultScreenDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         Rectangle vBounds = defaultScreenDevice.getDefaultConfiguration().getBounds();
-        return new Monitor(true, vBounds.x, vBounds.y, vBounds.width, vBounds.height, defaultScreenDevice.getDisplayMode().getWidth(), defaultScreenDevice.getDisplayMode().getHeight());
+
+        return new Monitor(
+                true,
+                vBounds.x,
+                vBounds.y,
+                (int) Math.floor(vBounds.width / scaleFactor),
+                (int) Math.floor(vBounds.height / scaleFactor),
+                defaultScreenDevice.getDisplayMode().getWidth(),
+                defaultScreenDevice.getDisplayMode().getHeight()
+        );
     }
 
     public static Monitor[] getAllMonitors() {
